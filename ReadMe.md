@@ -81,7 +81,7 @@ Then just inject against IGuardedCommandMap in your other Commands.
 
 **How do I create a Guard?**
 
-There is an optional interface - IGuard - to keep you honest, but any class which implements approves() and returns something will work, though you should be aware that the return value will be coerced to boolean.
+There is an optional interface - IGuard - to keep you honest, but any class which implements approve() and returns something will work, though you should be aware that the return value will be coerced to boolean.
 
 The standard interface to implement is:
 
