@@ -16,7 +16,9 @@ This has the advantage of allowing you to map a Command as oneShot, but know tha
 
 ##What's a Guard?
 
-A Guard is very similar to a Command. It has only one public method: approve():Boolean.
+A Guard is very similar to a Command. It has only one public method: 
+	
+	function approve():Boolean;
 
 The Guard Classes are instantiated in the same way as Command classes - so they can have injections in the same way as the Command, and can receive the Event class that triggered the CommandMap, just as the Command eventually will.
 
