@@ -1,4 +1,4 @@
-**What is a GuardedCommandMap?**
+##What is a GuardedCommandMap?
 
 Sometimes you want to map behaviour to an event, but only if certain other conditions are met.
 
@@ -8,13 +8,13 @@ Usually we wind up implementing this kind of logic using if() statements and ear
 
 The GuardedCommandMap abstracts the conditions from the actions.
 
-**Like how?**
+##Like how?
 
 As well as mapping a Command, you also map one or more Guards. The Command is only executed if all the Guards agree to it.
 
 This has the advantage of allowing you to map a Command as oneShot, but know that it won't be executed and unmapped unless all the Guards are passed.
 
-**What's a Guard?**
+##What's a Guard?
 
 A Guard is very similar to a Command. It has only one public method: approve():Boolean.
 
@@ -22,7 +22,7 @@ The Guard Classes are instantiated in the same way as Command classes - so they 
 
 The approve() method returns true or false. If all the approve() methods return true then the Command will be instantiated and will run. If any approve() method returns false then the process is aborted.      
 
-**Give me an example**
+##Give me an example
 
 My strategy game has a daily cycle which includes offering the player some casual labour, but we don't want to do this in the first three cycles of the game, while the player is still picking up the basics.
 
@@ -73,7 +73,7 @@ And if I wanted to combine guards, I can supply an array of guards instead of a 
 									  DayCycleEvent);
 
 
-**Incorporating GuardedCommandMap into your robotlegs project** 
+##Incorporating GuardedCommandMap into your robotlegs project
 
 You just need to instantiate and map it in your context - either early in startup, or by overriding the mapInjections context method:
 
@@ -85,7 +85,7 @@ You just need to instantiate and map it in your context - either early in startu
 
 Then just inject against IGuardedCommandMap in your other Commands.    
 
-**How do I create a Guard?**
+##How do I create a Guard?
 
 There is an optional interface - IGuard - to keep you honest, but any class which implements approve() and returns something will work, though you should be aware that the return value will be coerced to boolean.
 
@@ -96,16 +96,27 @@ The standard interface to implement is:
 Other than that there are no constraints on your guards, which means that if you're the sort of person who feels that lots of classes are a drag, you could hacky-hack your existing models to be guards - for example if you wanted to guard against something until a particular model has initialised. But I don't encourage that sort of thing. And you're probably using controllers anyway.
 
 
-**Compatibility with robotlegs versions**
+##Anything else I need to know?
+
+The full arguments list for mapping a guarded command is:
+
+	function mapGuardedEvent(eventType:String, commandClass:Class, guards:*, eventClass:Class = null, oneshot:Boolean = false):void;
+	
+You unmap using the normal unmapEvent() function from the standard CommandMap.
+
+	function unmapEvent(eventType:String, commandClass:Class, eventClass:Class = null):void;
+	
+
+##Compatibility with robotlegs versions
 
 This util has been tested against robotlegs versions 1.0 and 1.4 - it should work for any. By simply including the 3 classes in the source of your project you can ensure it compiles against the same version of robotlegs that you're using.                  
 
 
-**Wot no swc** 
+##Wot no swc
 
 Truth is, I can't get the damn thing to build a swc without also pulling in the robotlegs classes it extends, which would break compatibility with other versions of robotlegs. If you are a swc wizard, please fork and build a swc and share it.
 
-**Are these like Haskell Guards?**
+##Are these like Haskell Guards?
 
 Kinda, maybe.
 
