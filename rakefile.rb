@@ -24,8 +24,8 @@ project_model :model do |m|
   # m.test_dir              = 'test'
   # m.doc_dir               = 'doc'
   # m.asset_dir             = 'assets'
-  # m.compiler_gem_name     = 'sprout-flex4sdk-tool'
-  # m.compiler_gem_version  = '>= 4.0.0'
+  m.compiler_gem_name     = 'sprout-flex4sdk-tool'
+  m.compiler_gem_version  = '>= 4.0.0'
   # m.source_path           << "#{m.lib_dir}/somelib"
   m.source_path           << "#{m.lib_dir}/mockolate"  
   m.source_path           << "#{m.lib_dir}/robotlegs_v1_0"  
@@ -40,7 +40,9 @@ desc 'Compile and debug the application'
 debug :debug
 
 desc 'Compile run the test harness'
-unit :test
+unit :test do |t|
+  t.source_path << 'support'
+end
 
 desc 'Compile the optimized deployment'
 deploy :deploy
