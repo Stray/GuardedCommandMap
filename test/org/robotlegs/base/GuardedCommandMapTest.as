@@ -25,9 +25,11 @@ package org.robotlegs.base {
 	import org.robotlegs.core.IMediatorMap;
 	import org.robotlegs.core.IReflector;
 	import ICommandReporter;
+	import org.robotlegs.base.ContextEvent;
+	import org.robotlegs.base.ContextError;
 
-	public class GuardedCommandMapTest extends TestCase {
-		private var instance:GuardedCommandMap;
+	public class GuardedCommandMapTest extends TestCase implements ICommandReporter {
+		private var guardedCommandMap:GuardedCommandMap;
         private var injector:IInjector;
 		private var eventDispatcher:EventDispatcher;
 		private var _reportedCommands:Array;
@@ -64,57 +66,97 @@ package org.robotlegs.base {
 			injector.mapValue(ICommandReporter, this);
 			injector.mapValue(IInjector, injector);
 
-			instance = new GuardedCommandMap(eventDispatcher, injector, reflector);
+			guardedCommandMap = new GuardedCommandMap(eventDispatcher, injector, reflector);
 			
 		}
 
 		override protected function tearDown():void {
 			super.tearDown();
-			instance = null;
+			guardedCommandMap = null;
 		}
 
 		public function testInstantiated():void {
-			assertTrue("instance is GuardedCommandMap", instance is GuardedCommandMap);
+			assertTrue("guardedCommandMap is GuardedCommandMap", guardedCommandMap is GuardedCommandMap);
 		}
 
 		public function testFailure():void {
 			assertTrue("Failing test", true);
 		}
 		
-		public function test_one_command_with_one_guard_fires_when_guard_gives_yes():void {
-			assertTrue("One command with one guard fires when guard gives yes -> not implemented", false);
+		public function test_one_command_with_one_guard_fires_when_guard_gives_yes():void {             
+			var guard:Class = HappyGuard;
+			guardedCommandMap.mapGuardedEvent(ContextEvent.STARTUP, SampleCommandA, guard, ContextEvent);
+			eventDispatcher.dispatchEvent(new ContextEvent(ContextEvent.STARTUP));
+			assertEqualsArraysIgnoringOrder("received the correct command", [SampleCommandA], _reportedCommands);
 		} 
 		
 		public function test_one_command_with_one_guard_doesnt_fire_when_guard_gives_no():void {
-			assertTrue("One command with one guard doesnt fire when guard gives no -> not implemented", false);
+			var guard:Class = GrumpyGuard;
+			guardedCommandMap.mapGuardedEvent(ContextEvent.STARTUP, SampleCommandA, guard, ContextEvent);
+			eventDispatcher.dispatchEvent(new ContextEvent(ContextEvent.STARTUP));
+			assertEqualsArraysIgnoringOrder("received the correct command", [], _reportedCommands);
 		}
 		
 		public function test_one_command_with_two_guards_fires_if_both_say_yes():void {
-			assertTrue("One command with two guards fires if both say yes -> not implemented", false);
+			injector.mapSingletonOf(IInjectedAnswer, InjectedYes);
+			var guards:Array = [InjectedGuard, HappyGuard];
+			guardedCommandMap.mapGuardedEvent(ContextEvent.STARTUP, SampleCommandA, guards, ContextEvent); 
+			eventDispatcher.dispatchEvent(new ContextEvent(ContextEvent.STARTUP));
+			assertEqualsArraysIgnoringOrder("received the correct command", [SampleCommandA], _reportedCommands);
 		}
 		
 		public function test_one_command_with_two_guards_doesnt_fire_if_one_says_no():void {
-			assertTrue("One command with two guards doesnt fire if one says no -> not implemented", false);
+			var guards:Array = [GrumpyGuard, HappyGuard];
+			guardedCommandMap.mapGuardedEvent(ContextEvent.STARTUP, SampleCommandA, guards, ContextEvent); 
+			eventDispatcher.dispatchEvent(new ContextEvent(ContextEvent.STARTUP));
+			assertEqualsArraysIgnoringOrder("received the correct command", [], _reportedCommands);
 		}
 		
 		public function test_command_doesnt_fire_if_double_injected_guard_says_no():void {
-			assertTrue("Command doesnt fire if double injected guard says no -> not implemented", false);
+			injector.mapSingletonOf(IInjectedAnswer, InjectedYes);
+			injector.mapSingletonOf(IInjectedOtherAnswer, InjectedNo);
+			var guards:Array = [HappyGuard, DoubleInjectedGuard]; 
+			guardedCommandMap.mapGuardedEvent(ContextEvent.STARTUP, SampleCommandA, guards, ContextEvent); 
+			eventDispatcher.dispatchEvent(new ContextEvent(ContextEvent.STARTUP));
+			assertEqualsArraysIgnoringOrder("received the correct command", [], _reportedCommands);
 		}
 		
-		public function test_three_commands_with_different_guards_fire_correctly():void {
-			assertTrue("Three commands with different guards fire correctly -> not implemented", false);
+		public function test_three_commands_with_different_guards_fire_correctly():void { 
+			injector.mapSingletonOf(IInjectedAnswer, InjectedYes);
+			guardedCommandMap.mapGuardedEvent(ContextEvent.STARTUP, SampleCommandA, HappyGuard, ContextEvent);
+			guardedCommandMap.mapGuardedEvent(ContextEvent.STARTUP, SampleCommandB, GrumpyGuard, ContextEvent);
+			guardedCommandMap.mapGuardedEvent(ContextEvent.STARTUP, SampleCommandC, [HappyGuard, InjectedGuard], ContextEvent);
+			eventDispatcher.dispatchEvent(new ContextEvent(ContextEvent.STARTUP)); 
+			assertEqualsArraysIgnoringOrder("received the correct command", [SampleCommandA, SampleCommandC], _reportedCommands);
 		}
 		
 		public function test_error_thrown_if_non_guards_provided_in_guard_argument():void {
-			assertTrue("Error thrown if non guards provided in guard argument -> not implemented", false);
+			assertThrows(ContextError, function():void{
+				guardedCommandMap.mapGuardedEvent(ContextEvent.STARTUP, SampleCommandA, Sprite, ContextEvent);
+			});
+		}
+		
+		public function test_error_thrown_if_non_guards_provided_in_guard_argument_array():void {
+			assertThrows(ContextError, function():void{
+				guardedCommandMap.mapGuardedEvent(ContextEvent.STARTUP, SampleCommandA, [HappyGuard, Sprite], ContextEvent);
+			});
 		}
 		
 		public function test_unmapping_stops_command_firing():void {
-			assertTrue("Unmapping stops command firing -> not implemented", false);
-		}
+			var guard:Class = HappyGuard;
+			guardedCommandMap.mapGuardedEvent(ContextEvent.STARTUP, SampleCommandA, guard, ContextEvent);
+			guardedCommandMap.unmapEvent(ContextEvent.STARTUP, SampleCommandA, ContextEvent);
+			eventDispatcher.dispatchEvent(new ContextEvent(ContextEvent.STARTUP));
+			assertEqualsArraysIgnoringOrder("received the correct command", [], _reportedCommands);
+		}		
 		
 		public function test_unmapping_and_remapping_with_guards_works_fine():void {
-			assertTrue("Unmapping and remapping with guards works fine -> not implemented", false);
+			var guard:Class = HappyGuard;
+			guardedCommandMap.mapGuardedEvent(ContextEvent.STARTUP, SampleCommandA, guard, ContextEvent);
+			guardedCommandMap.unmapEvent(ContextEvent.STARTUP, SampleCommandA, ContextEvent);
+			guardedCommandMap.mapGuardedEvent(ContextEvent.STARTUP, SampleCommandA, guard, ContextEvent);
+			eventDispatcher.dispatchEvent(new ContextEvent(ContextEvent.STARTUP));
+			assertEqualsArraysIgnoringOrder("received the correct command", [SampleCommandA], _reportedCommands);  
 		}
 		
 	}

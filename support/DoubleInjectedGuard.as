@@ -8,7 +8,7 @@ package
 		public var answer:IInjectedAnswer;
 
 	    [Inject]
-		public var otherAnswer:IInjectedAnswer;
+		public var otherAnswer:IInjectedOtherAnswer;
 
 	    //---------------------------------------
 	    // IGuard Implementation
@@ -17,7 +17,7 @@ package
 	    //import org.robotlegs.core.IGuard;
 	    public function approve():Boolean
 	    {
-	    	return (answer.approve() && otherAnswer.approve());
+	    	return (answer.allow() && otherAnswer.allow());
 	    }
 	
 	} 
