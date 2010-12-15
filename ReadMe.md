@@ -16,11 +16,11 @@ This has the advantage of allowing you to map a Command as oneShot, but know tha
 
 **What's a Guard?**
 
-A Guard is very similar to a Command. It has only one public method: guard():Boolean.
+A Guard is very similar to a Command. It has only one public method: approve():Boolean.
 
 The Guard Classes are instantiated in the same way as Command classes - so they can have injections in the same way as the Command, and will receive the Event class that triggered the CommandMap, just as the Command eventually will.
 
-The guard() method returns true or false. If all the guard() methods return true then the Command be instantiated and will run. If any guard() method returns false then the process is aborted.
+The approve() method returns true or false. If all the approve() methods return true then the Command be instantiated and will run. If any approve() method returns false then the process is aborted.
 
 **Are these like Haskell Guards?**
 
