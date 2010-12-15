@@ -60,11 +60,17 @@ Which simplifies the actual Commands to:
 
 And even better, makes my mapping more declarative of my intent:
 
-	guardedCommandMap.mapGuardedEvent(DayCycleEvent.STONE_DELIVERY_COMPLETE, OfferLabourCommand, OnlyAfterLearningPeriod, DayCycleEvent);
+	guardedCommandMap.mapGuardedEvent(DayCycleEvent.STONE_DELIVERY_COMPLETE, 
+									  OfferLabourCommand, 
+									  OnlyAfterLearningPeriod, 
+									  DayCycleEvent);
 
 And if I wanted to combine guards, I can supply an array of guards instead of a single class:
 
-	guardedCommandMap.mapGuardedEvent(DayCycleEvent.STONE_DELIVERY_COMPLETE, OfferLabourCommand, [OnlyAfterLearningPeriod, OnlyWhenBehindSchedule], DayCycleEvent);
+	guardedCommandMap.mapGuardedEvent(DayCycleEvent.STONE_DELIVERY_COMPLETE, 
+									  OfferLabourCommand,
+									  [OnlyAfterLearningPeriod, OnlyWhenBehindSchedule], 
+									  DayCycleEvent);
 
 
 **Incorporating GuardedCommandMap into your robotlegs project** 
