@@ -8,8 +8,9 @@ package org.robotlegs.base {
 	import flash.utils.describeType;
 	import flash.utils.Dictionary;
 	import flash.events.Event;
+	import org.robotlegs.core.IGuardedCommandMap;
 	
-	public class GuardedCommandMap extends CommandMap {
+	public class GuardedCommandMap extends CommandMap implements IGuardedCommandMap {
 		
 		protected var verifiedGuardClasses:Dictionary; 
 		
