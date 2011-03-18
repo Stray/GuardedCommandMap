@@ -73,6 +73,16 @@ And if I wanted to combine guards, I can supply an array of guards instead of a 
 									  OfferLabourCommand,
 									  [OnlyAfterLearningPeriod, OnlyWhenBehindSchedule], 
 									  DayCycleEvent);
+                                                         
+##Fallback Commands
+
+You can also provide a fallback Command which will fire if the guards *don't* approve.
+
+	guardedCommandMap.mapGuardedEventWithFallback(DayCycleEvent.DAY_COMPLETED, 
+									  ShowDayProgressBehindSchedule,
+									  ShowDayProgress,
+									  OnlyWhenBehindSchedule, 
+									  DayCycleEvent); 
 
 
 ##Incorporating GuardedCommandMap into your robotlegs project
@@ -102,9 +112,13 @@ Other than that there are no constraints on your guards, which means that if you
 
 The full arguments list for mapping a guarded command is:
 
-	function mapGuardedEvent(eventType:String, commandClass:Class, guards:*, eventClass:Class = null, oneshot:Boolean = false):void;
+	function mapGuardedEvent(eventType:String, commandClass:Class, 
+								guards:*, eventClass:Class = null, oneshot:Boolean = false):void;
+
+	function mapGuardedEventWithFallback(eventType:String, commandClass:Class, fallbackCommandClass:Class,
+											guards:*, eventClass:Class = null, oneshot:Boolean = false):void;
 	
-You unmap using the normal unmapEvent() function from the standard CommandMap.
+You unmap using the normal unmapEvent() function from the standard CommandMap. This unmaps the event/command whether it was added with or without a fallback.
 
 	function unmapEvent(eventType:String, commandClass:Class, eventClass:Class = null):void;
 	
