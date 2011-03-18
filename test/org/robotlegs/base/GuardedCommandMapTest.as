@@ -158,6 +158,20 @@ package org.robotlegs.base {
 			eventDispatcher.dispatchEvent(new ContextEvent(ContextEvent.STARTUP));
 			assertEqualsArraysIgnoringOrder("received the correct command", [SampleCommandA], _reportedCommands);  
 		}
+		  
 		
+		public function test_one_command_with_fallback_fires_when_guard_gives_yes():void {             
+			var guard:Class = HappyGuard;
+			guardedCommandMap.mapGuardedEventWithFallback(ContextEvent.STARTUP, SampleCommandA, SampleCommandB, guard, ContextEvent);
+			eventDispatcher.dispatchEvent(new ContextEvent(ContextEvent.STARTUP));
+			assertEqualsArraysIgnoringOrder("received the correct command", [SampleCommandA], _reportedCommands);
+		}
+		
+		public function test_one_command_with_fallback_fires_fallback_when_guard_gives_no():void {             
+			var guard:Class = GrumpyGuard;
+			guardedCommandMap.mapGuardedEventWithFallback(ContextEvent.STARTUP, SampleCommandA, SampleCommandB, guard, ContextEvent);
+			eventDispatcher.dispatchEvent(new ContextEvent(ContextEvent.STARTUP));
+			assertEqualsArraysIgnoringOrder("received the correct command", [SampleCommandB], _reportedCommands);
+		}
 	}
 }

@@ -28,14 +28,13 @@ package org.robotlegs.base {
 		//import org.robotlegs.core.IGuardedCommandMap;
 		public function mapGuardedEvent(eventType:String, commandClass:Class, guards:*, eventClass:Class = null, oneshot:Boolean = false):void
 		{
-			if (!verifiedCommandClasses[commandClass])
-			{
-				verifiedCommandClasses[commandClass] = describeType(commandClass).factory.method.(@name == "execute").length() == 1;
-				if (!verifiedCommandClasses[commandClass])
-				{
-					throw new ContextError(ContextError.E_COMMANDMAP_NOIMPL + ' - ' + commandClass);
-				}
-			}
+			mapGuardedEventWithFallback(eventType, commandClass, null, guards, eventClass, oneshot);
+		}
+		
+
+		public function mapGuardedEventWithFallback(eventType:String, commandClass:Class, fallbackCommandClass:Class, guards:*, eventClass:Class = null, oneshot:Boolean = false):void
+		{
+			verifyCommandClass(commandClass);
             
 			if(!(guards is Array))
 			{
@@ -59,40 +58,48 @@ package org.robotlegs.base {
 			
 			var callback:Function = function(event:Event):void
 			{
-				routeEventToGuardedCommand(event, commandClass, oneshot, eventClass, guards);
+				routeEventToGuardedCommand(event, commandClass, oneshot, eventClass, guards, fallbackCommandClass);
 			};
 			eventDispatcher.addEventListener(eventType, callback, false, 0, true);
 			callbacksByCommandClass[commandClass] = callback;
-		} 
+		}
+
 		
-		protected function routeEventToGuardedCommand(event:Event, commandClass:Class, oneshot:Boolean, originalEventClass:Class, guardClasses:Array):void
+		protected function routeEventToGuardedCommand(event:Event, commandClass:Class, oneshot:Boolean, originalEventClass:Class, guardClasses:Array, fallbackCommandClass:Class = null):void
 		{
 			var eventClass:Class = Object(event).constructor;
 			if (!(event is originalEventClass)) return;
 			
 			injector.mapValue(eventClass, event);
-			
+
+			var approved:Boolean = true;
 			var guardClass:Class;
 			var iLength:uint = guardClasses.length;
+			
 			for (var i:int = 0; i < iLength; i++)
 			{
 				guardClass = guardClasses[i];
 				var nextGuard:Object = injector.instantiate(guardClass);
-				if(nextGuard.approve() == false)
+			    approved = (approved && nextGuard.approve());
+				if( (!approved) && (fallbackCommandClass == null) )
 				{
 					injector.unmap(eventClass);
 					return;
-				}
-			}
+				}   
+			}                                               
 			
-			var command:Object = injector.instantiate(commandClass);
+			var commandClassToRun:Class = approved ? commandClass : fallbackCommandClass;
+			
+			var command:Object = injector.instantiate(commandClassToRun);
 			injector.unmap(eventClass);
 			command.execute();
+			
 			if (oneshot)
 			{
 				unmapEvent(event.type, commandClass, originalEventClass);
 			}
-		}
+		} 
+		
         
 		protected function verifyGuardClasses(guardClasses:Array):void
 		{
@@ -103,12 +110,24 @@ package org.robotlegs.base {
 				guardClass = guardClasses[i];
 				if (!verifiedGuardClasses[guardClass])
 				{
-					verifiedGuardClasses[guardClass] = describeType(guardClass).factory.method.(@name == "approve").length();
+					verifiedGuardClasses[guardClass] = describeType(guardClass).factory.method.(@name == "approve").length() == 1;
 					if (!verifiedGuardClasses[guardClass])
 						throw new ContextError(E_GUARD_NOIMPL + ' - ' + guardClass);
 				}
 			}    
 			
+		}
+		
+		protected function verifyCommandClass(commandClass:Class):void
+		{
+			if (!verifiedCommandClasses[commandClass])
+			{
+				verifiedCommandClasses[commandClass] = describeType(commandClass).factory.method.(@name == "execute").length() == 1;
+				if (!verifiedCommandClasses[commandClass])
+				{
+					throw new ContextError(ContextError.E_COMMANDMAP_NOIMPL + ' - ' + commandClass);
+				}
+			}
 		}
 		 
 	}
